@@ -1,6 +1,9 @@
 import VueI18n from 'vue-i18n';
 
-import { ErrorCode as GovernanceErrorCode } from '@/services/v2/api/mover/governance/types';
+import {
+  ErrorCode as GovernanceErrorCode,
+  ProposalStatus
+} from '@/services/v2/api/mover/governance/types';
 import { ValidationErrorReason } from '@/services/v2/api/swap/0x/types';
 import { NftAssetId } from '@/store/modules/nft/types';
 
@@ -758,10 +761,10 @@ const messages: VueI18n.LocaleMessageObject = {
       simple: 'See All'
     },
     lblOutcome: {
-      quorumNotReached: 'Quorum not reached',
-      quorumReached: 'Quorum reached',
-      accepted: 'Accepted',
-      defeated: 'Defeated'
+      [ProposalStatus.QuorumNotReached]: 'Quorum not reached',
+      [ProposalStatus.QuorumReached]: 'Quorum reached',
+      [ProposalStatus.Passed]: 'Accepted',
+      [ProposalStatus.Rejected]: 'Defeated'
     },
     lblProposal: 'Proposal',
     lblCreateAProposal: 'Create a proposal',
