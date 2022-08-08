@@ -219,7 +219,7 @@ export default Vue.extend({
         this.inputAsset &&
         sameAddress(this.inputAsset.address, this.outputUSDCAsset.address)
       ) {
-        possibleSavingsBalance = this.inputAmount;
+        possibleSavingsBalance = this.inputAmount || '0';
       } else if (this.transferData !== undefined) {
         possibleSavingsBalance = fromWei(
           this.transferData.buyAmount,
