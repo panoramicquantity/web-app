@@ -7,8 +7,8 @@ import Web3 from 'web3';
 import { Explorer } from '@/services/explorer';
 import { NetworkAlias, TransactionsResponse } from '@/services/moralis/types';
 import { isError } from '@/services/responses';
-import { AlchemyAPIService } from '@/services/v2/api/alchemy/AlchemyAPIService';
-import { AnkrAPIService } from '@/services/v2/api/ankr';
+// import { AlchemyAPIService } from '@/services/v2/api/alchemy/AlchemyAPIService';
+// import { AnkrAPIService } from '@/services/v2/api/ankr';
 import { getAssetPriceFromPriceRecord } from '@/services/v2/utils/price';
 import {
   addSentryBreadcrumb,
@@ -50,8 +50,8 @@ export class MoralisExplorer implements Explorer {
   private nativeTransactionsCursor: string | null = null;
   private erc20TransactionsCursor: string | null = null;
 
-  private readonly ankrService: AnkrAPIService | undefined = undefined;
-  private readonly alchemyService: AlchemyAPIService | undefined = undefined;
+  // private readonly ankrService: AnkrAPIService | undefined = undefined;
+  // private readonly alchemyService: AlchemyAPIService | undefined = undefined;
 
   private static readonly erc20AbiApprove = [
     {
@@ -108,27 +108,27 @@ export class MoralisExplorer implements Explorer {
       }
     });
     addABI(MoralisExplorer.erc20AbiApprove);
-    // TODO: use real api key for ANKR
-    try {
-      if (AnkrAPIService.canHandle(this.network)) {
-        this.ankrService = new AnkrAPIService(this.accountAddress, '', [
-          this.network
-        ]);
-      }
-    } catch (e) {
-      captureSentryException(e);
-    }
+    // // TODO: use real api key for ANKR
+    // try {
+    //   if (AnkrAPIService.canHandle(this.network)) {
+    //     this.ankrService = new AnkrAPIService(this.accountAddress, '', [
+    //       this.network
+    //     ]);
+    //   }
+    // } catch (e) {
+    //   captureSentryException(e);
+    // }
 
-    try {
-      if (AlchemyAPIService.canHandle(this.network)) {
-        this.alchemyService = new AlchemyAPIService(
-          this.accountAddress,
-          APIKeys.ALCHEMY_API_KEY
-        );
-      }
-    } catch (e) {
-      captureSentryException(e);
-    }
+    // try {
+    //   if (AlchemyAPIService.canHandle(this.network)) {
+    //     this.alchemyService = new AlchemyAPIService(
+    //       this.accountAddress,
+    //       APIKeys.ALCHEMY_API_KEY
+    //     );
+    //   }
+    // } catch (e) {
+    //   captureSentryException(e);
+    // }
   }
 
   public init = async (): Promise<void> => {
@@ -396,66 +396,66 @@ export class MoralisExplorer implements Explorer {
   };
 
   private getErc20Tokens = async (): Promise<Array<TokenWithBalance>> => {
-    const baseAssetData = getBaseAssetData(this.network);
+    // const baseAssetData = getBaseAssetData(this.network);
 
-    if (this.alchemyService !== undefined) {
-      const tokens = await this.alchemyService.getTokens(this.network);
-      return [
-        ...tokens,
-        {
-          address: baseAssetData.address,
-          balance: fromWei(
-            await this.web3.eth.getBalance(this.accountAddress),
-            baseAssetData.decimals
-          ),
-          priceUSD: store.getters['account/baseTokenPrice'],
-          marketCap: store.getters['account/getTokenMarketCap'](
-            baseAssetData.address
-          ),
-          decimals: baseAssetData.decimals,
-          logo: baseAssetData.iconURL,
-          name: baseAssetData.name,
-          symbol: baseAssetData.symbol,
-          color: store.getters['account/getTokenColor'](baseAssetData.address)
-        }
-      ];
-    }
+    // if (this.alchemyService !== undefined) {
+    //   const tokens = await this.alchemyService.getTokens(this.network);
+    //   return [
+    //     ...tokens,
+    //     {
+    //       address: baseAssetData.address,
+    //       balance: fromWei(
+    //         await this.web3.eth.getBalance(this.accountAddress),
+    //         baseAssetData.decimals
+    //       ),
+    //       priceUSD: store.getters['account/baseTokenPrice'],
+    //       marketCap: store.getters['account/getTokenMarketCap'](
+    //         baseAssetData.address
+    //       ),
+    //       decimals: baseAssetData.decimals,
+    //       logo: baseAssetData.iconURL,
+    //       name: baseAssetData.name,
+    //       symbol: baseAssetData.symbol,
+    //       color: store.getters['account/getTokenColor'](baseAssetData.address)
+    //     }
+    //   ];
+    // }
 
-    if (this.ankrService !== undefined) {
-      try {
-        const tokens = await this.ankrService.getTokens();
-        if (
-          tokens.find((t) => sameAddress(t.address, baseAssetData.address)) !==
-          undefined
-        ) {
-          return tokens;
-        }
-        return [
-          ...tokens,
-          {
-            address: baseAssetData.address,
-            balance: '0',
-            priceUSD: store.getters['account/baseTokenPrice'],
-            marketCap: store.getters['account/getTokenMarketCap'](
-              baseAssetData.address
-            ),
-            decimals: baseAssetData.decimals,
-            logo: baseAssetData.iconURL,
-            name: baseAssetData.name,
-            symbol: baseAssetData.symbol,
-            color: store.getters['account/getTokenColor'](baseAssetData.address)
-          }
-        ];
-      } catch (err) {
-        addSentryBreadcrumb({
-          type: 'error',
-          category: 'explorer.moralis.error',
-          message: 'ANKR get token error, trying to use Moralis instead'
-        });
-        captureSentryException(err);
-        return await this.getErc20TokensFromMoralis();
-      }
-    }
+    // if (this.ankrService !== undefined) {
+    //   try {
+    //     const tokens = await this.ankrService.getTokens();
+    //     if (
+    //       tokens.find((t) => sameAddress(t.address, baseAssetData.address)) !==
+    //       undefined
+    //     ) {
+    //       return tokens;
+    //     }
+    //     return [
+    //       ...tokens,
+    //       {
+    //         address: baseAssetData.address,
+    //         balance: '0',
+    //         priceUSD: store.getters['account/baseTokenPrice'],
+    //         marketCap: store.getters['account/getTokenMarketCap'](
+    //           baseAssetData.address
+    //         ),
+    //         decimals: baseAssetData.decimals,
+    //         logo: baseAssetData.iconURL,
+    //         name: baseAssetData.name,
+    //         symbol: baseAssetData.symbol,
+    //         color: store.getters['account/getTokenColor'](baseAssetData.address)
+    //       }
+    //     ];
+    //   } catch (err) {
+    //     addSentryBreadcrumb({
+    //       type: 'error',
+    //       category: 'explorer.moralis.error',
+    //       message: 'ANKR get token error, trying to use Moralis instead'
+    //     });
+    //     captureSentryException(err);
+    //     return await this.getErc20TokensFromMoralis();
+    //   }
+    // }
     return await this.getErc20TokensFromMoralis();
   };
 
