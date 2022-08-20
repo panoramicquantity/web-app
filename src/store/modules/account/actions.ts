@@ -543,6 +543,7 @@ const actions: ActionFuncs<
       console.info('Wallet refreshed');
     } finally {
       state.isWalletLoading = false;
+      dispatch('updateWalletAfterTxn');
     }
   },
   initServices({ state, commit, dispatch, getters }): void {
@@ -677,7 +678,7 @@ const actions: ActionFuncs<
       });
     }
   },
-  async updateWalletAfterTxn({ state, dispatch }): Promise<void> {
+  async updateWalletAfterTxn({ state, dispatch, commit }): Promise<void> {
     const nftInfoPromise = dispatch('nft/loadNFTInfo', undefined, {
       root: true
     });
@@ -701,6 +702,23 @@ const actions: ActionFuncs<
         })
       : Promise.resolve();
 
+    // update base assets
+    if (
+      state.provider !== undefined &&
+      typeof state.currentAddress === 'string'
+    ) {
+      const balance = await state.provider.web3.eth.getBalance(
+        state.currentAddress
+      );
+
+      console.log('balance', balance);
+
+      commit('setAccountData', {
+        addresses: state.addresses,
+        balance: balance,
+        networkInfo: state.networkInfo
+      } as AccountData);
+    }
     const promisesResults = await Promise.allSettled([
       savingsInfoPromise,
       savingsPlusInfoPromise,
