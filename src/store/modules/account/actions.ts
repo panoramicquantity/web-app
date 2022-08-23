@@ -703,22 +703,42 @@ const actions: ActionFuncs<
       : Promise.resolve();
 
     // update base assets
+    let balance = state.balance;
+    let tokensWithPrice: TokenWithBalance[] | undefined;
     if (
       state.provider !== undefined &&
       typeof state.currentAddress === 'string'
     ) {
-      const balance = await state.provider.web3.eth.getBalance(
-        state.currentAddress
-      );
+      if (state.explorer) {
+        try {
+          tokensWithPrice = await state.explorer?.getTokensWithPrices();
+          for (let i = tokensWithPrice.length - 1; i >= 0; i--) {
+            const currentAsset = tokensWithPrice[i];
+            if (currentAsset.symbol === state.networkInfo?.baseAsset.symbol) {
+              balance = currentAsset.balance;
+              break;
+            }
+          }
+        } catch (error) {
+          Sentry.captureException(error);
+        }
+      } else {
+        balance = await state.provider.web3.eth.getBalance(
+          state.currentAddress
+        );
+      }
 
-      console.log('balance', balance);
-
+      console.log('balance of base asset', balance);
       commit('setAccountData', {
         addresses: state.addresses,
         balance: balance,
         networkInfo: state.networkInfo
       } as AccountData);
     }
+
+    // refresh ERC-20 tokens
+    state.explorer?.refreshWalletData();
+
     const promisesResults = await Promise.allSettled([
       savingsInfoPromise,
       savingsPlusInfoPromise,
@@ -726,6 +746,7 @@ const actions: ActionFuncs<
       nftInfoPromise,
       debitCardAvailableSkinsPromise
     ]);
+
     const promisesErrors = promisesResults
       .filter((p): p is PromiseRejectedResult => p.status === 'rejected')
       .map((p) => p.reason);

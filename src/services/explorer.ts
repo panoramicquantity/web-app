@@ -17,7 +17,7 @@ export interface Explorer {
   ) => void;
   refreshWalletData: () => void;
   hasInfiniteLoader: () => boolean;
-
+  getTokensWithPrices: () => Promise<TokenWithBalance[]>;
   loadMoreTransactions(nativeOnly: boolean): Promise<boolean>;
 }
 

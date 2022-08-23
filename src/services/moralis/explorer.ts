@@ -140,6 +140,21 @@ export class MoralisExplorer implements Explorer {
     return true;
   };
 
+  public getTokensWithPrices = async (): Promise<TokenWithBalance[]> => {
+    return this.getErc20Tokens()
+      .then((tokens) => this.initialTokenEnrich(tokens))
+      .then((tokens) => this.mergeTokensWithLocalTokens(tokens))
+      .then((tokens) => this.mapTokensToChecksumAddresses(tokens))
+      .then((tokens) => this.enrichTokensWithPrices(tokens))
+      .then((tokens) => this.enrichTokensWithNative(tokens))
+      .then((tokensWithNative) => {
+        this.setTokens(tokensWithNative);
+        // set tokens list loaded as early as possible
+        this.setIsTokensListLoaded(true);
+        return tokensWithNative;
+      });
+  };
+
   public refreshWalletData = async (): Promise<void> => {
     try {
       this.setIsTransactionsListLoaded(false);
@@ -150,18 +165,7 @@ export class MoralisExplorer implements Explorer {
         return;
       }
 
-      const tokensWithPricePromise = this.getErc20Tokens()
-        .then((tokens) => this.initialTokenEnrich(tokens))
-        .then((tokens) => this.mergeTokensWithLocalTokens(tokens))
-        .then((tokens) => this.mapTokensToChecksumAddresses(tokens))
-        .then((tokens) => this.enrichTokensWithPrices(tokens))
-        .then((tokens) => this.enrichTokensWithNative(tokens))
-        .then((tokensWithNative) => {
-          this.setTokens(tokensWithNative);
-          // set tokens list loaded as early as possible
-          this.setIsTokensListLoaded(true);
-          return tokensWithNative;
-        });
+      const tokensWithPricePromise = this.getTokensWithPrices();
 
       if (isFeatureEnabled('isTransactionsListAvailable', this.network)) {
         const erc20TransactionsPromise = this.getErc20Transactions(
